@@ -1,0 +1,46 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@variables('array')"
+                },
+                "runAfter": {
+                    "Transform_JSON_To_JSON": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Transform_JSON_To_JSON": {
+                "type": "Liquid",
+                "kind": "JsonToJson",
+                "inputs": {
+                    "content": [],
+                    "map": {
+                        "source": "LogicApp",
+                        "name": "json_to_json.liquid"
+                    }
+                },
+                "runAfter": {}
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "type": "array"
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}

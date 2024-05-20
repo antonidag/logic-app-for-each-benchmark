@@ -1,0 +1,64 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "For_each": {
+                "type": "Foreach",
+                "foreach": "@triggerBody()",
+                "actions": {
+                    "Set_variable_-_add_additional_property": {
+                        "type": "SetVariable",
+                        "inputs": {
+                            "name": "array",
+                            "value": "@addProperty(items('For_each'),'batchId',guid())"
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variable_-_array": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Initialize_variable_-_array": {
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "array",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "runAfter": {}
+            },
+            "Response": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200,
+                    "body": "@variables('array')"
+                },
+                "runAfter": {
+                    "For_each": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "type": "array"
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateful"
+}
