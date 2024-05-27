@@ -4,10 +4,10 @@
         "actions": {
             "For_each": {
                 "type": "Foreach",
-                "foreach": "@triggerBody()",
+                "foreach": "@body('Filter_array')",
                 "actions": {
-                    "Set_variable_-_add_additional_property": {
-                        "type": "SetVariable",
+                    "Append_to_array_variable_-_add_object": {
+                        "type": "AppendToArrayVariable",
                         "inputs": {
                             "name": "array",
                             "value": "@addProperty(items('For_each'),'batchId',guid())"
@@ -15,7 +15,7 @@
                     }
                 },
                 "runAfter": {
-                    "Initialize_variable_-_array": [
+                    "Filter_array": [
                         "SUCCEEDED"
                     ]
                 }
@@ -30,20 +30,32 @@
                         }
                     ]
                 },
-                "runAfter": {}
-            },
-            "Response": {
-                "type": "Response",
-                "kind": "Http",
-                "inputs": {
-                    "statusCode": 200,
-                    "body": "@variables('array')"
-                },
                 "runAfter": {
-                    "For_each": [
+                    "Response_-_202_Accepted": [
                         "SUCCEEDED"
                     ]
                 }
+            },
+            "Filter_array": {
+                "type": "Query",
+                "inputs": {
+                    "from": "@triggerBody()",
+                    "where": "@equals(item()?['status'],'active')"
+                },
+                "runAfter": {
+                    "Initialize_variable_-_array": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_-_202_Accepted": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 202
+                },
+                "runAfter": {},
+                "operationOptions": "Asynchronous"
             }
         },
         "contentVersion": "1.0.0.0",

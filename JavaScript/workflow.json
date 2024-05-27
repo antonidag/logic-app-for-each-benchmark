@@ -2,25 +2,25 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Response": {
-                "type": "Response",
-                "kind": "Http",
+            "Execute_JavaScript_Code": {
+                "type": "JavaScriptCode",
                 "inputs": {
-                    "statusCode": 200,
-                    "body": "@variables('array')"
+                    "code": "const generateGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\r\n  const r = Math.random() * 16 | 0;\r\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\r\n  return v.toString(16);\r\n});\r\n\r\nconst activeData = [];\r\nfor (let i = 0; i < data.length; i++) {\r\n  if (data[i].status === 'active') {\r\n    activeData.push({ ...data[i], batchId: generateGUID() });\r\n  }\r\n}\r\nreturn activeData;"
                 },
                 "runAfter": {
-                    "Execute_JavaScript_Code": [
+                    "Response_-_202_Accepted": [
                         "SUCCEEDED"
                     ]
                 }
             },
-            "Execute_JavaScript_Code": {
-                "type": "JavaScriptCode",
+            "Response_-_202_Accepted": {
+                "type": "Response",
+                "kind": "Http",
                 "inputs": {
-                    "code": "return 0;"
+                    "statusCode": 202
                 },
-                "runAfter": {}
+                "runAfter": {},
+                "operationOptions": "Asynchronous"
             }
         },
         "contentVersion": "1.0.0.0",

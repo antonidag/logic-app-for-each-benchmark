@@ -4,18 +4,36 @@
         "actions": {
             "For_each": {
                 "type": "Foreach",
-                "foreach": "@body('Filter_array')",
+                "foreach": "@triggerBody()",
                 "actions": {
-                    "Set_variable_-_add_additional_property": {
-                        "type": "SetVariable",
-                        "inputs": {
-                            "name": "array",
-                            "value": "@addProperty(items('For_each'),'batchId',guid())"
+                    "Condition": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "equals": [
+                                        "@item()?['status']",
+                                        "active"
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "Append_to_array_variable_-_add__object": {
+                                "type": "AppendToArrayVariable",
+                                "inputs": {
+                                    "name": "array",
+                                    "value": "@addProperty(items('For_each'),'batchId',guid())"
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {}
                         }
                     }
                 },
                 "runAfter": {
-                    "Filter_array": [
+                    "Initialize_variable_-_array": [
                         "SUCCEEDED"
                     ]
                 }
@@ -30,32 +48,20 @@
                         }
                     ]
                 },
-                "runAfter": {}
+                "runAfter": {
+                    "Response_-_202_Accepted": [
+                        "SUCCEEDED"
+                    ]
+                }
             },
-            "Response": {
+            "Response_-_202_Accepted": {
                 "type": "Response",
                 "kind": "Http",
                 "inputs": {
-                    "statusCode": 200,
-                    "body": "@variables('array')"
+                    "statusCode": 202
                 },
-                "runAfter": {
-                    "For_each": [
-                        "SUCCEEDED"
-                    ]
-                }
-            },
-            "Filter_array": {
-                "type": "Query",
-                "inputs": {
-                    "from": "@triggerBody()",
-                    "where": "@equals('test','active')"
-                },
-                "runAfter": {
-                    "Initialize_variable_-_array": [
-                        "SUCCEEDED"
-                    ]
-                }
+                "runAfter": {},
+                "operationOptions": "Asynchronous"
             }
         },
         "contentVersion": "1.0.0.0",
