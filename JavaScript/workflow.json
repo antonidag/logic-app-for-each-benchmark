@@ -3,37 +3,37 @@
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
             "Execute_JavaScript_Code": {
-                "type": "JavaScriptCode",
                 "inputs": {
-                    "code": "const generateGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\r\n  const r = Math.random() * 16 | 0;\r\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\r\n  return v.toString(16);\r\n});\r\n\r\nconst activeData = [];\r\nfor (let i = 0; i < data.length; i++) {\r\n  if (data[i].status === 'active') {\r\n    activeData.push({ ...data[i], batchId: generateGUID() });\r\n  }\r\n}\r\nreturn activeData;"
+                    "code": "const generateGUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\r\n  const r = Math.random() * 16 | 0;\r\n  const v = c === 'x' ? r : (r & 0x3 | 0x8);\r\n  return v.toString(16);\r\n});\r\nconst data = workflowContext.trigger.outputs.body;\r\nconst activeData = [];\r\nfor (let i = 0; i < data.length; i++) {\r\n  if (data[i].status === 'active') {\r\n    let newObject = {};\r\n\r\n    // Copy properties from data[i] to newObject\r\n    for (let key in data[i]) {\r\n      if (data[i].hasOwnProperty(key)) {\r\n        newObject[key] = data[i][key];\r\n      }\r\n    }\r\n\r\n    // Add the batchId property\r\n    newObject.batchId = generateGUID();\r\n\r\n    // Push the new object to activeData\r\n    activeData.push(newObject);\r\n  }\r\n}\r\nreturn activeData;"
                 },
                 "runAfter": {
                     "Response_-_202_Accepted": [
                         "SUCCEEDED"
                     ]
-                }
+                },
+                "type": "JavaScriptCode"
             },
             "Response_-_202_Accepted": {
-                "type": "Response",
-                "kind": "Http",
                 "inputs": {
                     "statusCode": 202
                 },
+                "kind": "Http",
+                "operationOptions": "Asynchronous",
                 "runAfter": {},
-                "operationOptions": "Asynchronous"
+                "type": "Response"
             }
         },
         "contentVersion": "1.0.0.0",
         "outputs": {},
         "triggers": {
             "When_a_HTTP_request_is_received": {
-                "type": "Request",
-                "kind": "Http",
                 "inputs": {
                     "schema": {
                         "type": "array"
                     }
-                }
+                },
+                "kind": "Http",
+                "type": "Request"
             }
         }
     },
